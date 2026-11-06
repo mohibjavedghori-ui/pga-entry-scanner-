@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PGA QR Camera Scanner</title>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 25px 15px;
+      background: #F3F5F9;
+      font-family: Arial, sans-serif;
+      color: #081735;
+      text-align: center;
+    }
+
+    header {
+      background: #081735;
+      color: white;
+      padding: 22px;
+      border-bottom: 4px solid #B98A35;
+      border-radius: 12px;
+    }
+
+    header span { color: #E8BD63; }
+
+    .panel {
+      background: white;
+      max-width: 550px;
+      margin: 25px auto;
+      padding: 22px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px #00000012;
+    }
+
+    #reader {
+      width: 100%;
+      margin: 20px auto;
+    }
+
+    #ticket {
+      background: #E6F6EB;
+      border: 1px solid #B7E4C5;
+      padding: 18px;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    #ticketId {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 15px;
+      color: #146333;
+      overflow-wrap: anywhere;
+    }
+
+    button {
+      background: #B98A35;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .secondary {
+      background: #081735;
+    }
+
+    .instructions {
+      color: #6B7890;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>PGA <span>OFFICIAL SCANNER</span></h2>
+  <p>Youth Revival Meeting</p>
+</header>
+
+<div class="panel">
+  <h2>QR Ticket Scanner</h2>
+
+  <p class="instructions">
+    Allow camera access and position the guest's
+    QR code inside the scanning frame.
+  </p>
+
+  <div id="reader"></div>
+
+  <div id="ticket">
+    <h3>QR CODE DETECTED</h3>
+    <div id="ticketId"></div>
+
+    <button onclick="copyTicket()">
+      COPY TICKET ID
+    </button>
+
+    <button class="secondary" onclick="scanAgain()">
+      SCAN NEXT
+    </button>
+
+    <p id="copyStatus"></p>
+  </div>
+</div>
+
+<script>
+  let scanner;
+
+  function startScanner() {
+    scanner = new Html5QrcodeScanner(
+      "reader",
+      {
+        fps: 10,
+        qrbox: { width: 230, height: 230 },
+        rememberLastUsedCamera: true
+      },
+      false
+    );
+
+    scanner.render(onScanSuccess, () => {});
+  }
+
+  function onScanSuccess(decodedText) {
+    document.getElementById("ticketId").textContent =
+      decodedText.trim();
+
+    document.getElementById("ticket").style.display =
+      "block";
+
+    document.getElementById("copyStatus").textContent = "";
+
+    scanner.clear().catch(console.error);
+  }
+
+  async function copyTicket() {
+    const value =
+      document.getElementById("ticketId").textContent;
+
+    try {
+      await navigator.clipboard.writeText(value);
+      document.getElementById("copyStatus").textContent =
+        "Ticket ID copied successfully!";
+    } catch (error) {
+      document.getElementById("copyStatus").textContent =
+        "Please select and copy the ticket ID manually.";
+    }
+  }
+
+  function scanAgain() {
+    document.getElementById("ticket").style.display =
+      "none";
+
+    startScanner();
+  }
+
+  startScanner();
+</script>
+
+</body>
+</html>
